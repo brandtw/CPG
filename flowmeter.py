@@ -1,4 +1,4 @@
-import serial
+from alicat import FlowController
 
-ser = serial.serial('COM4', 19200)
-data = ser.readline()
+flow_controller = FlowController.is_connected(port='COM4')
+print(flow_controller)

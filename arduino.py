@@ -1,4 +1,16 @@
-from alicat import FlowController
+import serial
+import time
 
-flow_controller = FlowController.is_connected(port='COM4')
-print(flow_controller)
+ser = serial.Serial('COM3', 9600)
+ser.timeout = 1
+
+while True:
+    i = input("input(on/off): ").strip()
+    if i == 'done':
+        print("finished program")
+        break
+    ser.write(i.encode())
+    time.sleep(0.5)
+    print(ser.readline().decode('ascii'))
+
+ser.close()
