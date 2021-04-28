@@ -18,22 +18,22 @@ void loop() {
   if (Serial.available() > 0) {
   incomingByte = Serial.readStringUntil('\n');
     if (incomingByte == "pump on") {
-      digitalWrite(4, LOW);
+      digitalWrite(2, LOW);
       Serial.write("Pump on");
     }
 
     else if (incomingByte == "pump off") {
-      digitalWrite(4, HIGH);
+      digitalWrite(2, HIGH);
       Serial.write("Pump off");
     }
 
     else if (incomingByte == "fan off") {
-      digitalWrite(2, HIGH);
+      digitalWrite(4, HIGH);
       Serial.write("Fan off");
     }
 
     else if (incomingByte == "fan on") {
-      digitalWrite(2, LOW);
+      digitalWrite(4, LOW);
       Serial.write("Fan on");
     }
 
