@@ -8,23 +8,30 @@ import numpy as np
 import serial
 from threading import Thread
 import os
+import alicat
 from alicat import FlowController
 from PIL import ImageTk, Image
 
 class CPG_GUI():
     def __init__(self):
-        self.is_off = True
-        self.ser = serial.Serial('COM3', 9600)
+        self.is_off_1 = True
+        self.is_off_2 = True
+        self.ser = serial.Serial('COM6', 9600)
         self.ser.timeout = 1
-        self.flow_controller_1 = FlowController(port='COM4', address = 'A')
+        self.flow_controller_air = FlowController(port='COM4', address = 'A')
+        # self.flow_controller_propane = FlowController(port='COM4', address = 'B')
+        self.flow_controller_decane = FlowController(port='COM4', address = 'C')
+        # self.flow_controller_nitrogen = FlowController(port='COM4', address = 'D')
     
-    def sWrite(self, x,button):
-        if self.is_off:
-            button.config(bg="#e0e6ef")
-            self.is_off = False
+    def sWrite(self, x,button,is_off):
+        if is_off == True:
+            button.config(bg="#d12c2c")
+            is_off = False
+            print('nay')
         else:
-            button.config(bg="#fff100")
-            self.is_off = True
+            print('ye')
+            button.config(bg="#2cd137")
+            is_off = True
         print(x)
         self.ser.write(x)
 
@@ -83,14 +90,20 @@ class CPG_GUI():
         self.entry_5= tk.Entry(self.frame_left, bg="#e0e6ef", font='Helvetica 13')
         self.entry_5.place(relx = 0.5, rely=0.75, relwidth=0.5,relheight=0.05, anchor = 'n')
 
-        self.button_1 = tk.Button(self.frame_bottom, text="Start Pump", bg='#fff100', font='Helvetica 10 bold', command = lambda: self.sWrite(b'p',self.button_1))
+        self.button_1 = tk.Button(self.frame_bottom, text="Start Pump", bg='#2cd137', font='Helvetica 10 bold', command = lambda: self.sWrite(b'p',self.button_1,self.is_off_1))
         self.button_1.place(relx=0.1,rely= 0.2, relheight=0.2,relwidth=0.2)
 
-        self.button_2 = tk.Button(self.frame_bottom, text="Start Fans", bg='#fff100', font='Helvetica 10 bold',command = lambda: self.sWrite(b'f',self.button_2))
+        self.button_2 = tk.Button(self.frame_bottom, text="Start Fans", bg='#2cd137', font='Helvetica 10 bold',command = lambda: self.sWrite(b'f',self.button_2,self.is_off_2))
         self.button_2.place(relx=0.4,rely= 0.2, relheight=0.2,relwidth=0.2)
 
-        self.button_4 = tk.Button(self.frame_bottom, text="Start gas flows", bg='#fff100', font='Helvetica 10 bold', command = lambda: self.startflows(self.entry_1.get(), self.Vol_air))
+        self.button_4 = tk.Button(self.frame_bottom, text="Start Inerts", bg='#2cd137', font='Helvetica 10 bold', command = lambda: self.startflows(self.entry_1.get(), self.Vol_air))
         self.button_4.place(relx=0.7,rely= 0.2, relheight=0.2,relwidth=0.2)
+
+        self.button_5 = tk.Button(self.frame_bottom, text="Stop gas flows", bg='#2cd137', font='Helvetica 10 bold', command = lambda: self.stopflows(self.entry_1.get()))
+        self.button_5.place(relx=0.7,rely= 0.5, relheight=0.2,relwidth=0.2)
+
+        self.button_5 = tk.Button(self.frame_bottom, text="Start Combustibles", bg='#2cd137', font='Helvetica 10 bold', command = lambda: self.startcombustibles(self.entry_1.get()))
+        self.button_5.place(relx=0.4,rely= 0.5, relheight=0.2,relwidth=0.2)
 
         self.x = [1,2,3,4,5,6,7,8,9,10]
         self.xstr =  ['null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null', 'null']
@@ -120,10 +133,20 @@ class CPG_GUI():
     def startflows(self, methane, air):
         self.timestartflows = datetime.now()
         self.threehourset = self.timestartflows + timedelta(hours = 3)
-        self.flow_controller_1.set_gas("Air")
-        print(self.flow_controller_1.get())
-        print(methane)
-        print(air)
+        self.flow_controller_air.set_flow_rate(19200)
+        time.sleep(1)
+        # self.flow_controller_propane.set_flow_rate(3213)
+    
+    def startcombustibles(self, methane):
+        # self.flow_controller_nitrogen.set_flow_rate(8960)
+        self.flow_controller_decane.set_flow_rate(5120)
+
+    def stopflows(self, methane):
+        # self.flow_controller_nitrogen.set_flow_rate(0)
+        self.flow_controller_air.set_flow_rate(0)
+        # self.flow_controller_propane.set_flow_rate(0)
+        self.flow_controller_decane.set_flow_rate(0)
+        time.sleep(1)
 
     def update(self):
         self.timenow2 = datetime.now()
