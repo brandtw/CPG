@@ -1,7 +1,6 @@
 import tkinter as tk
 import time
 from datetime import datetime, timedelta
-import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
@@ -11,7 +10,6 @@ from threading import Thread
 import os
 import alicat
 from alicat import FlowController
-from PIL import ImageTk, Image
 import winsound
 
 class CPG_GUI():
@@ -30,7 +28,7 @@ class CPG_GUI():
         self.flow_controller_nitrogen = FlowController(port=self.port_alicat, address = 'D')
         self.pump_on = False
         self.fan_on = False
-        self.alarm = True
+        self.alarm = False
         self.disabled = False
         self.hydrocarbon = 'Methane'
         self.ratio = 0
