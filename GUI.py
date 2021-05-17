@@ -32,7 +32,7 @@ class CPG_GUI():
         self.alarm = False
         self.disabled = False
         self.hydrocarbon = 'Methane'
-        self.ratio = 15.5
+        self.ratio = 17.19
     
     def pWrite(self, x):
         if self.pump_on:
