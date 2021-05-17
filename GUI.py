@@ -176,7 +176,7 @@ class CPG_GUI():
             self.button_6.config(text='Start Methane')
             self.label_1.config(text='Methane Flow Rate (LPM)')
             self.hydrocarbon = 'Methane'
-            self.ratio = 9.52
+            self.ratio = 17.19
         if gas == 1:
             self.flow_controller_methane.set_gas("C3H8")
             self.button_8.config(bg='#2cd137')
