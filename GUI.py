@@ -27,11 +27,12 @@ class CPG_GUI():
         self.flow_controller_decane = FlowController(port=self.port_alicat, address = 'C')
         self.flow_controller_nitrogen = FlowController(port=self.port_alicat, address = 'D')
         self.pump_on = False
+        self.vent_on = False
         self.fan_on = False
         self.alarm = False
         self.disabled = False
         self.hydrocarbon = 'Methane'
-        self.ratio = 0
+        self.ratio = 15.5
     
     def pWrite(self, x):
         if self.pump_on:
@@ -97,7 +98,8 @@ class CPG_GUI():
         self.button_stop = tk.Button(self.frame_right, text="Stop All Flows", bg='#ed392f', font='Helvetica 10 bold',command = lambda: self.stopflows())
         self.button_stop.place(relx=0.1,rely= 0.1, relheight=0.1,relwidth=0.7)
 
-        self.button_vent = tk.Button(self.frame_right, text="Vent Chamber", bg='#ed392f', font='Helvetica 10 bold',command = lambda: self.startnitrogenshroud(40))
+        self.button_vent = tk.Button(self.frame_right, text="Vent Chamber", bg='#ed392f', font='Helvetica 10 bold',command = lambda: [self.startair(25), 
+                                                                                                self.button_vent.config(bg='#2cd137', text = 'Venting Chamber')])
         self.button_vent.place(relx=0.1,rely= 0.25, relheight=0.1,relwidth=0.7)
 
         self.entry_N2 = tk.Entry(self.frame_left, bg="#e0e6ef", font='Helvetica 13')
@@ -112,8 +114,8 @@ class CPG_GUI():
         self.button_2 = tk.Button(self.frame_bottom, text="Start Fans", bg='#f7ed2d', font='Helvetica 10 bold',command = lambda: self.fWrite(b'f'))
         self.button_2.place(relx=0.4,rely= 0.5, relheight=0.2,relwidth=0.2)
 
-        self.button_4 = tk.Button(self.frame_bottom, text="Start Nitrogen Shroud", bg='#f7ed2d', font='Helvetica 10 bold', command = lambda: [self.startnitrogenshroud(self.entry_N2.get()),
-                                                                                                                                self.button_4.config(bg='#2cd137')])
+        self.button_4 = tk.Button(self.frame_bottom, text="Start N2 Shroud", bg='#f7ed2d', font='Helvetica 10 bold', command = lambda: [self.startnitrogenshroud(self.entry_N2.get()),
+                                                                                                                                self.button_4.config(bg='#2cd137', text = 'Update N2 Shroud')])
         self.button_4.place(relx=0.7,rely= 0.2, relheight=0.2,relwidth=0.2)
 
         self.button_5 = tk.Button(self.frame_bottom, text="Start Air", bg='#f7ed2d', font='Helvetica 10 bold', command = lambda: [self.startair(self.Vol_air),
@@ -131,7 +133,7 @@ class CPG_GUI():
         self.label_10 = tk.Label(self.frame_right, font='Helvetica 10 bold', text="Select Gas", bg='#918f8e')
         self.label_10.place(relx = 0.25, rely = 0.55)
 
-        self.button_7 = tk.Button(self.frame_right, text="Methane", bg='#f7ed2d', font='Helvetica 10 bold',command = lambda: self.gasselect(0))
+        self.button_7 = tk.Button(self.frame_right, text="Methane", bg='#2cd137', font='Helvetica 10 bold',command = lambda: self.gasselect(0))
         self.button_7.place(relx=0.1,rely= 0.6, relheight=0.1,relwidth=0.7)
 
         self.button_8 = tk.Button(self.frame_right, text="Propane", bg='#f7ed2d', font='Helvetica 10 bold',command = lambda: self.gasselect(1))
@@ -172,6 +174,7 @@ class CPG_GUI():
             self.button_7.config(bg='#2cd137')
             self.button_8.config(bg='#f7ed2d')
             self.button_6.config(text='Start Methane')
+            self.label_1.config(text='Methane Flow Rate (LPM)')
             self.hydrocarbon = 'Methane'
             self.ratio = 9.52
         if gas == 1:
@@ -179,8 +182,9 @@ class CPG_GUI():
             self.button_8.config(bg='#2cd137')
             self.button_7.config(bg='#f7ed2d')
             self.button_6.config(text='Start Propane')
+            self.label_1.config(text='Propane Flow Rate (LPM)')
             self.hydrocarbon = 'Propane'
-            self.ratio = 23.9
+            self.ratio = 15.67
     
     def setalarm(self):
         if self.disabled == True:
@@ -192,7 +196,7 @@ class CPG_GUI():
 
     
     def startnitrogenshroud(self, nitrogen):
-        command = '{addr}{setpoint}\r'.format(addr="D", setpoint= int((float(nitrogen)/250)*64000))
+        command = '{addr}{setpoint}\r'.format(addr="D", setpoint= int((float(nitrogen)/20)*64000))
         self.flow_controller_nitrogen._test_controller_open()
         self.flow_controller_nitrogen._write_and_read(command, self.retries)
     
@@ -202,7 +206,7 @@ class CPG_GUI():
         self.flow_controller_methane._write_and_read(command, self.retries)
 
     def startair(self, air):
-        command = '{addr}{setpoint}\r'.format(addr="A", setpoint= int((float(air)/20)*64000))
+        command = '{addr}{setpoint}\r'.format(addr="A", setpoint= int((float(air)/250)*64000))
         self.flow_controller_air._test_controller_open()
         self.flow_controller_air._write_and_read(command, self.retries)
 
@@ -215,7 +219,8 @@ class CPG_GUI():
         self.button_3.config(bg='#f7ed2d', text = "Start Decane")
         self.button_6.config(bg='#f7ed2d', text = "Start {}".format(self.hydrocarbon))
         self.button_5.config(bg='#f7ed2d', text = "Start Air")
-        self.button_4.config(bg='#f7ed2d', text = "Nitrogen Shroud")
+        self.button_4.config(bg='#f7ed2d', text = "Start N2 Shroud")
+        self.button_vent.config(bg='#ed392f', text = 'Vent Chamber')
         try:
             self.startdecane(0)
         except:
@@ -235,7 +240,7 @@ class CPG_GUI():
 
     def update(self):
         try:
-            self.Vol_air = float(self.entry_methane.get())*float(self.entry_EQ.get())*self.ratio
+            self.Vol_air = (float(self.entry_methane.get())*self.ratio)/float(self.entry_EQ.get())
             display_Vol_air = round(self.Vol_air,4)
             if float(self.entry_EQ.get()) > 1:
                 self.label_air.config(text = display_Vol_air, fg = '#0e8f07')
@@ -252,7 +257,7 @@ class CPG_GUI():
             self.ax.set_xticklabels(self.xstr, Fontsize = 8)
             for i in self.y:
                 if int(i) > 10:
-                    self.ax.set_ylim([0,int(i)+10])
+                    self.ax.set_ylim([0,int(i)+50])
             self.fig.canvas.draw()
             self.fig.canvas.flush_events()
             time.sleep(1)
@@ -265,11 +270,11 @@ class CPG_GUI():
                 data = self.ser.readline()
                 data = data[0:-2]
                 data = float(data)
-                print(data)
-                if data >= 100.0:
+                if data >= 300.0:
                     self.alarm = True
-                if self.disabled == False and self.alarm == True and data < 100.0:
+                if self.disabled == False and self.alarm == True and data < 300.0:
                     self.playsound()
+                    self.stopflows()
                 self.y.append(data)
                 self.timenow = datetime.now()
                 self.floattimedelta = self.timenow - self.timepast
